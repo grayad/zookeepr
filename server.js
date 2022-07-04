@@ -17,6 +17,8 @@ const app = express();
 app.use(express.urlencoded({ extended: true }));
 // parse incoming JSON data
 app.use(express.json());
+// make asset files readily available, aka static resources
+app.use(express.static('public'));
 
 function filterByQuery(query, animalsArray) {
     let personalityTraitsArray = [];
@@ -70,7 +72,7 @@ function createNewAnimal(body, animalsArray) {
 
     // write new data to animals.json
     fs.writeFileSync(
-      path.join('.', './data/animals.json'),
+      path.join(__dirname, './data/animals.json'),
       // convert JS array data to JSON, do not change current data, and leave white space for readability
       JSON.stringify({animals: animalsArray}, null, 2)
     );
@@ -131,6 +133,26 @@ app.post('/api/animals', (req, res) => {
       const animal = createNewAnimal(req.body, animals);
       res.json(req.body);
     }
+});
+
+// return html homepage in server's root directory
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, './public/index.html'));
+});
+
+// return html animal page at endpoint /animals
+app.get('/animals', (req, res) => {
+  res.sendFile(path.join(__dirname, './public/animals.html'));
+});
+
+// serve zookeepers html
+app.get('/zookeepers', (req, res) => {
+  res.sendFile(path.join(__dirname, './public/zookeepers.html'));
+});
+
+// wildcard route for any requests that do not exist
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, './public/index.html'));
 });
 
 // chain listen() method onto the server to listen for requests
